@@ -36,3 +36,6 @@ router.get('/top-companies', employerCtrl.getTopCompanies);
 router.get('/:uid', employerCtrl.getPublic);
 
 export default router;
+
+// Employer's all applications
+router.get('/me/applications', authenticate, requireRole('employer'), employerCtrl.getMyApplications);

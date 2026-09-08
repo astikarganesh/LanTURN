@@ -106,3 +106,26 @@ export const getAnalytics = asyncHandler(async (req, res) => {
     meta: { requestId: req.id },
   });
 });
+export const getMyApplications = asyncHandler(async (req, res) => {
+  const uid = req.user.uid;
+  const jobsResult = await jobsRepo.listByEmployer(uid, { limit: 500 });
+  const jobs = jobsResult.items || [];
+  
+  const jobIds = jobs.map(j => j.jobId);
+  let allApplications = [];
+  for (const jobId of jobIds) {
+    const apps = await applicationsRepo.listByJob(jobId, { limit: 500 });
+    allApplications = allApplications.concat(apps);
+  }
+  
+  // Sort by newest first
+  allApplications.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  
+  res.json({
+    data: {
+      items: allApplications,
+      nextCursor: null
+    },
+    meta: { requestId: req.id }
+  });
+});
